@@ -90,4 +90,19 @@ class FormController extends Controller
         $form->delete();
         return response()->json(['message' => 'Form deleted']);
     }
+
+
+
+    public function apiGetByFormCode($form_code)
+    {
+        $form = Form::with(['teacher', 'questions.options']) // Sertakan pertanyaan dan opsinya
+                    ->where('form_code', $form_code)
+                    ->first();
+
+        if (!$form) {
+            return response()->json(['message' => 'Form not found.'], 404);
+        }
+
+        return response()->json($form);
+    }
 }

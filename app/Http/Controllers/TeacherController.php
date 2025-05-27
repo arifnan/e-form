@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Teacher;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 // use Illuminate\Support\Facades\View;        // tambahkan ini
 // use Illuminate\Support\Facades\Redirect;    // tambahkan ini
 // use Illuminate\Support\Facades\Response;    // tambahkan ini
@@ -67,4 +68,22 @@ class TeacherController extends Controller
             'data' => $query
         ], 200);
     }
+
+
+public function apiGetFormHistory(Request $request)
+    {
+        $teacher = Auth::user(); // Mengambil guru yang terautentikasi
+
+        if (!$teacher || !($teacher instanceof \App\Models\Teacher)) {
+             return response()->json(['message' => 'Unauthenticated or not a teacher.'], 401);
+        }
+
+        $forms = Form::where('teacher_id', $teacher->id)
+                     ->withCount('responses') // Menghitung jumlah respons untuk setiap form
+                     ->orderBy('created_at', 'desc')
+                     ->get();
+
+        return response()->json($forms);
+    }
+
 }

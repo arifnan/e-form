@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Student;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth; // Tambahkan ini
+use App\Models\Response;
 // use Illuminate\Support\Facades\View;        // tambahkan ini
 // use Illuminate\Support\Facades\Redirect;    // tambahkan ini
 // use Illuminate\Support\Facades\Response;    // tambahkan ini
@@ -65,4 +67,38 @@ class StudentController extends Controller
             'data' => $query
         ], 200);
     }
+
+
+public function apiGetResponseHistory(Request $request)
+    {
+        $student = Auth::user(); // Mengambil siswa yang terautentikasi
+
+        if (!$student || !($student instanceof \App\Models\Student)) {
+            return response()->json(['message' => 'Unauthenticated or not a student.'], 401);
+        }
+
+        $responses = Response::where('student_id', $student->id)
+                             ->with(['form' => function ($query) {
+                                 $query->select('id', 'title', 'teacher_id')->with('teacher:id,name'); // Memuat form dengan judul dan nama guru pembuat
+                             }, 'answers']) // Memuat jawaban terkait
+                             ->orderBy('created_at', 'desc')
+                             ->get();
+        
+        // Transformasi data untuk menyertakan detail yang lebih baik
+        $history = $responses->map(function ($response) {
+            return [
+                'response_id' => $response->id,
+                'form_id' => $response->form->id,
+                'form_title' => $response->form->title,
+                'form_creator' => $response->form->teacher->name ?? 'N/A',
+                'submitted_at' => $response->created_at->toDateTimeString(),
+                'total_answers' => $response->answers->count(),
+                // Anda bisa menambahkan detail jawaban jika diperlukan
+            ];
+        });
+
+
+        return response()->json($history);
+    }
+
 }
