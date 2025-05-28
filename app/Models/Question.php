@@ -13,9 +13,15 @@ class Question extends Model
         'form_id',
         'question_text',
         'question_type',
-        'is_required',
-        'requires_location'
+        'options', // JSON array
+        'is_required', // Boolean
     ];
+
+    protected $casts = [
+        'options' => 'array',
+        'is_required' => 'boolean',
+    ];
+
 
     // Relasi: Satu pertanyaan bisa memiliki banyak opsi jawaban (jika multiple_choice, dropdown, checkbox)
     public function options()
