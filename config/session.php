@@ -18,7 +18,9 @@ return [
     |
     */
 
-    'driver' => env('SESSION_DRIVER', 'database'),
+   'driver' => env('SESSION_DRIVER', 'database'), // <-- Driver sesi Anda kemungkinan besar 'database'
+
+    'table' => env('SESSION_TABLE', 'sessions'), // <-- Nama tabel yang digunakan adalah 'sessions'
 
     /*
     |--------------------------------------------------------------------------

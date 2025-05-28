@@ -39,7 +39,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/forms', [FormController::class, 'apiStore']);
     Route::put('/forms/{form}', [FormController::class, 'apiUpdate']);
     Route::delete('/forms/{form}', [FormController::class, 'apiDestroy']);
-
+    Route::get('/forms/{form}', [FormController::class, 'show']);
     // API untuk question
     Route::get('/questions', [QuestionController::class, 'apiIndex']);
     Route::post('/questions', [QuestionController::class, 'apiStore']);
