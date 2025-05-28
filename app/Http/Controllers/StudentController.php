@@ -69,6 +69,38 @@ class StudentController extends Controller
     }
 
 
+     public function apiRegister(Request $request)
+    {
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'gender' => 'required|boolean',
+            'email' => 'required|string|email|max:255|unique:students,email',
+            'password' => 'required|string|min:6|confirmed',
+            'grade' => 'required|string|max:255',
+            'address' => 'nullable|string',
+        ]);
+
+        $student = Student::create([
+            'name' => $validatedData['name'],
+            'gender' => $validatedData['gender'],
+            'email' => $validatedData['email'],
+            'password' => $validatedData['password'], // Model akan otomatis hash
+            'grade' => $validatedData['grade'],
+            'address' => $validatedData['address'] ?? null,
+        ]);
+
+        // Buat token untuk murid yang baru diregistrasi
+        $token = $student->createToken('api-token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Student registered successfully',
+            'student' => $student,
+            'token' => $token
+        ], 201);
+    }
+
+
+
 public function apiGetResponseHistory(Request $request)
     {
         $student = Auth::user(); // Mengambil siswa yang terautentikasi
@@ -96,7 +128,6 @@ public function apiGetResponseHistory(Request $request)
                 // Anda bisa menambahkan detail jawaban jika diperlukan
             ];
         });
-
 
         return response()->json($history);
     }

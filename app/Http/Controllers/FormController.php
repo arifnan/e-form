@@ -1,4 +1,4 @@
-<?
+<?php
 namespace App\Http\Controllers;
 
 use App\Models\Form;
@@ -7,10 +7,22 @@ use Illuminate\Http\Request;
 
 class FormController extends Controller
 {
-    public function index()
+    
+   public function index(Request $request) 
     {
-        $forms = Form::with('teacher')->get();
-        return view('forms.index', compact('forms'));
+    
+        $teachers = Teacher::all(); 
+        
+        $query = Form::with('teacher');
+
+        $teacherId = $request->input('teacher_id'); 
+        if ($teacherId) {
+            $query->where('teacher_id', $teacherId);
+        }
+        
+        $forms = $query->get();
+
+        return view('forms.index', compact('forms', 'teachers'));
     }
 
     public function create()
@@ -29,6 +41,7 @@ class FormController extends Controller
 
         Form::create($request->all());
         return redirect()->route('forms.index')->with('success', 'Form created.');
+        
     }
 
     public function edit(Form $form)

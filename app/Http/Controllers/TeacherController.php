@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Teacher;
+use App\Models\Form;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 // use Illuminate\Support\Facades\View;        // tambahkan ini
@@ -68,6 +69,40 @@ class TeacherController extends Controller
             'data' => $query
         ], 200);
     }
+
+
+ public function apiRegister(Request $request)
+    {
+        $validatedData = $request->validate([
+            'nip' => 'required|string|unique:teachers,nip',
+            'name' => 'required|string|max:255',
+            'gender' => 'required|boolean',
+            'email' => 'required|string|email|max:255|unique:teachers,email',
+            'password' => 'required|string|min:6|confirmed',
+            'subject' => 'required|string|max:255',
+            'address' => 'nullable|string',
+        ]);
+
+        $teacher = Teacher::create([
+            'nip' => $validatedData['nip'],
+            'name' => $validatedData['name'],
+            'gender' => $validatedData['gender'],
+            'email' => $validatedData['email'],
+            'password' => $validatedData['password'], // Model akan otomatis hash
+            'subject' => $validatedData['subject'],
+            'address' => $validatedData['address'] ?? null,
+        ]);
+
+        // Buat token untuk guru yang baru diregistrasi
+        $token = $teacher->createToken('api-token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Teacher registered successfully',
+            'teacher' => $teacher,
+            'token' => $token
+        ], 201);
+    }
+
 
 
 public function apiGetFormHistory(Request $request)

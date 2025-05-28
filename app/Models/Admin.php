@@ -1,18 +1,36 @@
 <?php
+
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Laravel\Sanctum\HasApiTokens; // Import HasApiTokens
-use Illuminate\Notifications\Notifiable; // Import Notifiable jika belum ada
 
-class Student extends Authenticatable
+class Admin extends Authenticatable
 {
-    use HasFactory, HasApiTokens, Notifiable; // Tambahkan HasApiTokens dan Notifiable
+    use HasFactory, Notifiable, HasApiTokens; // Tambahkan HasApiTokens
 
-    protected $fillable = ['name', 'gender', 'email', 'password', 'grade', 'address'];
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+    ];
 
-    protected $hidden = ['password', 'remember_token']; // Tambahkan remember_token jika belum ada
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var list<string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
 
     /**
      * Get the attributes that should be cast.
@@ -22,13 +40,8 @@ class Student extends Authenticatable
     protected function casts(): array
     {
         return [
-            // 'email_verified_at' => 'datetime', // Dihapus karena fitur verifikasi email belum dibutuhkan
+            'email_verified_at' => 'datetime', // Dihapus karena fitur verifikasi email belum dibutuhkan
             'password' => 'hashed',
         ];
-    }
-
-    public function responses()
-    {
-        return $this->hasMany(Response::class);
     }
 }
