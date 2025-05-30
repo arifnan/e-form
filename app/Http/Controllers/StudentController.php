@@ -5,11 +5,17 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Student;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\ResponseResource;
+use Laravel\Sanctum\HasApiTokens;
+
+
 // use Illuminate\Support\Facades\View;        // tambahkan ini
 // use Illuminate\Support\Facades\Redirect;    // tambahkan ini
 // use Illuminate\Support\Facades\Response;    // tambahkan ini
 class StudentController extends Controller
 {
+
     public function index(Request $request) {
         $query = Student::query();
     
@@ -64,5 +70,22 @@ class StudentController extends Controller
             'message' => 'Data murid ditemukan',
             'data' => $query
         ], 200);
+    }
+
+     public function apiGetStudentSubmittedResponsesHistory(Request $request)
+    {
+        $student = Auth::user(); // Asumsi user yang login adalah siswa
+
+        // if (!$student || ($student->role ?? null) !== 'student') {
+        //     return response()->json(['message' => 'Unauthorized. Students only.'], 403);
+        // }
+        // Jika Student model terpisah, Auth::user() akan instance dari Student
+
+        $responsesHistory = $student->submittedResponses() // Menggunakan relasi submittedResponses()
+                                     ->with(['form.teacher', 'answers.question.options']) // Eager load form, teacher dari form, dan jawaban beserta pertanyaannya
+                                     ->latest('submitted_at') // atau created_at
+                                     ->paginate(15); // Paginasi
+
+        return ResponseResource::collection($responsesHistory);
     }
 }

@@ -5,11 +5,15 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Teacher;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\FormResource; 
+use Laravel\Sanctum\HasApiTokens;
 // use Illuminate\Support\Facades\View;        // tambahkan ini
 // use Illuminate\Support\Facades\Redirect;    // tambahkan ini
 // use Illuminate\Support\Facades\Response;    // tambahkan ini
 class TeacherController extends Controller
 {
+
     public function index(Request $request) {
         $query = Teacher::query();
     
@@ -67,4 +71,26 @@ class TeacherController extends Controller
             'data' => $query
         ], 200);
     }
+
+/**
+     * Menampilkan riwayat formulir yang dibuat oleh guru yang terautentikasi.
+     * Sesuai dengan GET /teacher/forms/history
+     */
+    public function apiGetTeacherFormsHistory(Request $request)
+    {
+        $teacher = Auth::user();
+
+        // if (!$teacher || ($teacher->role ?? null) !== 'teacher') {
+        //     return response()->json(['message' => 'Unauthorized. Teachers only.'], 403);
+        // }
+        // Jika Teacher model terpisah, Auth::user() akan instance dari Teacher
+
+        $formsHistory = $teacher->createdForms() // Menggunakan relasi createdForms()
+                                ->with(['questions.options', 'responses']) // Eager load untuk detail
+                                ->latest() // Urutkan dari yang terbaru
+                                ->paginate(15); // Paginasi
+
+        return FormResource::collection($formsHistory);
+    }
+
 }
