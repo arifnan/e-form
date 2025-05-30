@@ -16,23 +16,22 @@ class AuthController extends Controller
         return view('auth.register');
     }
 
-    public function register(Request $request) {
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6|confirmed',
-        ]);
+   public function register(Request $request) {
+    $request->validate([
+        'name' => 'required',
+        'email' => 'required|email|unique:admins,email', // Diubah ke unique:admins,email
+        'password' => 'required|min:6|confirmed',
+    ]);
 
-        Admin::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 'admin'
-        ]);
+    Admin::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => Hash::make($request->password),
+        // 'role' => 'admin' // Hapus atau pastikan kolom 'role' ada di tabel 'admins'
+    ]);
 
-        return redirect()->route('login')->with('success', 'Registrasi berhasil. Silakan login.');
-    }
-
+    return redirect()->route('login')->with('success', 'Registrasi berhasil. Silakan login.');
+}
     public function showLogin() {
         return view('auth.login');
     }
